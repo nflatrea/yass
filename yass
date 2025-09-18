@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+
+import os
+import re
+import yaml
+import shutil
+
+from datetime import datetime
+from markdown import markdown
+
+from collections import defaultdict
+ 
+from jinja2 import select_autoescape
+from jinja2 import Environment, FileSystemLoader
+
+CONTENT_DIR         = os.environ.get('CONTENT_DIR', 'content')
+TEMPLATE_DIR        = os.environ.get('TEMPLATE_DIR', 'template')
+PUBLIC_DIR          = os.environ.get('PUBLIC_DIR', 'public')
+STATIC_DIR          = os.environ.get('STATIC_DIR', 'static')
+BASE_TEMPLATE       = os.environ.get('BASE_TEMPLATE', 'base.html')
+CONFIG_FILE         = os.environ.get('CONFIG_FILE', 'config.yaml')
+
+def read_content(path, **kwargs):
+    with open(path, 'r', **kwargs) as f:
+        return f.read().strip()
+
+def write_content(path, content, **kwargs):
+    with open(path, 'w', **kwargs) as f:
+        f.write(content.strip())
+
+def parse_front_matter(content):
+
+    _regex = re.compile(r'^---\s*([\s\S]*?)\s*---', re.MULTILINE)
+    _match = _regex.search(content)
+    _page  = {}
+    
+    if _match:
+        _page.update(yaml.safe_load(_match.group(1)))
+        _page["content"] = content[len(_match.group(0)):].strip()
+    else:
+        _page["content"] = content.strip()
+        
+    return _page
+
+def get_pages(path):
+    pages = defaultdict(list)
+    for root, _, files in os.walk(path):
+        subdir = os.path.normpath(os.path.relpath(root, path))
+        for filename in files:
+            if not filename.endswith('.md'): continue
+            src = os.path.join(root, filename)
+            dst = os.path.join(subdir, filename.replace(".md", ".html"))
+            raw_content = read_content(src, encoding='utf-8')
+            page = parse_front_matter(raw_content)
+            page.setdefault("url", dst)
+            page.update({ "filename": filename })
+            pages[subdir].append(page)
+            
+    return pages
+
+if __name__ == "__main__":
+
+    if not os.path.exists(PUBLIC_DIR): os.makedirs(PUBLIC_DIR)
+
+    site = yaml.safe_load(read_content(CONFIG_FILE))
+    site.update({ "last_update": datetime.now().isoformat() })
+
+    env = Environment(
+                loader=FileSystemLoader(TEMPLATE_DIR), 
+                autoescape=select_autoescape(['html', 'xml']))
+
+    env.filters['markdown'] = markdown
+    
+    pages = get_pages(CONTENT_DIR)
+    
+    for subdir,subpages in pages.items(): 
+        for page in subpages:
+
+            dst = os.path.normpath(os.path.join(PUBLIC_DIR, page["url"]))
+            if not os.path.exists(os.path.dirname(dst)): os.makedirs(os.path.dirname(dst))
+        
+            page.setdefault("template", BASE_TEMPLATE)
+            page.setdefault("last_update", datetime.now().isoformat())
+
+            template = env.get_template(page.get('template'))
+            html = template.render(page=page, site=site, pages=pages)
+            write_content(dst, html, encoding='utf-8')
+            print(f"Rendered {dst}")  
+
+    shutil.copytree(STATIC_DIR,
+        os.path.join(PUBLIC_DIR,STATIC_DIR),
+        dirs_exist_ok=True)
+
+    print(f"Copied {STATIC_DIR} to {PUBLIC_DIR}")
+    print(f"Done!")
