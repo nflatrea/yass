@@ -113,7 +113,7 @@ def main():
 
     def __markdown(data, extensions=['attr_list', 'fenced_code']):
         return markdown(data, extensions=extensions)
-    def __now(fmt = "%Y-%m-%d %H:%M")
+    def __now(fmt = "%Y-%m-%d %H:%M"):
         return datetime.now().strftime(fmt)
         
     __env__.filters["markdown"] = __markdown 

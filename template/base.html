@@ -13,6 +13,6 @@
 	{% endfor %}
 	</ul>
 	<div id="content">{{ page.content | markdown }}</div>
-	<footer>last build {{ now }}</footer>
+	<footer>last build {{ now() }}</footer>
 </body>
 </html>
