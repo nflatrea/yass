@@ -1,3 +1,15 @@
+```
+  ___    ___ ________  ________   ________      
+ |\  \  /  /|\   __  \|\   ____\ |\   ____\     
+ \ \  \/  / | \  \|\  \ \  \___|_\ \  \___|_    
+  \ \    / / \ \   __  \ \_____  \\ \_____  \   
+   \/  /  /   \ \  \ \  \|____|\  \\|____|\  \  
+ __/  / /      \ \__\ \__\____\_\  \ ____\_\  \ 
+|\___/ /        \|__|\|__|\_________\\_________\
+\|___|/                  \|_________\|_________| @nflatrea
+                                                
+```                                                
+
 # Yass - Yet Another Static Site Generator
 
 Yass is a simple static site generator built with Python, Jinja2, and Markdown.
@@ -16,15 +28,23 @@ The tool is designed to be straightforward and easy to use,.
 
 ```
 .
-├── content 		# Markdown content
+├── app.py
+├── config.yaml
+├── content
+│   ├── index.md
+│   └── subdir
+│       └── index.md
 ├── LICENSE
-├── public		# Public HTML (yass output)
+├── Makefile
 ├── README.md
 ├── requirements.txt
-├── static		# Static HTML (will be copied into public/static)
-├── template 		# HTML Templates dir
-└── yass
-
+├── static
+│   ├── css
+│   │   └── style.css
+│   └── misc
+│       └── example.txt
+└── template
+    └── base.html
 ```
 
 ## Getting Started
@@ -112,17 +132,31 @@ Everything is defined in `requirements.txt`
 
 4. **Build the Site**:
 
-   Run the Yass tool to build your site:
+   You can use the `Makefile` to build your site:
    ```sh
-   python yass
+   $ make clean		// Remove public folder
+   $ make build		// Build the static site
+   ```
+
+   or directly build the site from `yass.py`
+
+   ```sh
+   $ python yass.py
+   $ cp -r static public/static
    ```
 
 5. **Serve the Site**:
 
-   You can use Python's built-in HTTP server to serve the site:
-   ```sh
-   python -m http.server -d public
-   ```
+	You can use the `Makefile` to serve the website:
+	```sh
+	$ make run
+	```
+
+	Or use Python's built-in HTTP server:
+
+	```sh
+	$ python -m http.server -d public
+	```
 
 ## Contributing
 

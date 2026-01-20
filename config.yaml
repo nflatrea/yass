@@ -1,0 +1,9 @@
+url: "https://example.com"
+
+menu:
+  - name: "Home" 
+    url: /index.html
+  - name: "Subdir"
+    url: /subdir/index.html
+    
+style: /static/css/style.css

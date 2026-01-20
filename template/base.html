@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<link rel="stylesheet" type="text/css" href="{{ site.style }}" />
+	<title>{{ site.title }} | {{ page.title }}</title>
+</head>
+<body>
+	<span>{{ page.url }}</span>
+	<ul>
+	{% for item in site.menu %}
+		<li><a href="{{ item.url }}" class="{{ item.class | default('') }}">[{{item.name}}]</a></li>
+	{% endfor %}
+	</ul>
+	<div id="content">{{ page.content | markdown }}</div>
+	<footer>last build {{ now }}</footer>
+</body>
+</html>
